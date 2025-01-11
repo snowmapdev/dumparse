@@ -1,2 +1,2 @@
 # dumparse
-A tool to parse a Wikipedia XML dump and separate out into markdown files for use in Obsidian
+A dumb tool to parse a Wikipedia XML Dump and separate articles out into markdown files for Obsidian.
