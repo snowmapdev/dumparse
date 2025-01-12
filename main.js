@@ -26,7 +26,7 @@ readline.on('line', function (line) {
         isInPage = true; // Set the flag to true
         pageContent = ''; // Reset the content variable for a new <page> block
     }
-    if (line.includes('<title>') && !line.includes('Wikipedia:WikiProject Spam/LinkReports')) {
+    if (line.includes('<title>') && !line.includes('Wikipedia:WikiProject Spam/LinkReports')) { //if the line is a title and does NOT include spamreports
         articleCount++;
         articleTitle = line.slice(11, -8); //slice the first 11 chars and last 8 chars to grab only the title
         articleTitle = articleTitle.replace(regex, '-');
@@ -34,15 +34,14 @@ readline.on('line', function (line) {
         if (articleCount % 10000000 === 0) { //if the articles reaches 10 milly add one to the directory count so a new directory gets made
             articleDirectoryCount++;
         }
-    }
-    else {
-        isInPage = false; // Set the flag to true
+        //} else {
+        //  isInPage = false; // Set the flag to true
     }
     if (isInPage == true) {
         pageContent += line + '\n'; // Append the current line with a newline
     }
     if (line.includes('</page>')) {
-        isInPage = false; // Reset the flag as the block ends
+        isInPage = false; // Rleset the flag as the block ends
         if (!fs.existsSync('/home/dev/dumparse/wikidump/articles' + articleDirectoryCount)) {
             fs.mkdirSync('/home/dev/dumparse/wikidump/articles' + articleDirectoryCount, { recursive: true });
             console.log('Created new subdirectory: articles' + articleDirectoryCount);

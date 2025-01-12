@@ -45,8 +45,8 @@ readline.on('line', function(line) {
         if (articleCount % 10000000 === 0) { //if the articles reaches 10 milly add one to the directory count so a new directory gets made
             articleDirectoryCount ++;
         }
-    } else {
-        isInPage = false; // Set the flag to true
+    //} else {
+      //  isInPage = false; // Set the flag to true
     }
 
     if (isInPage == true) {
