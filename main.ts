@@ -36,7 +36,7 @@ readline.on('line', function(line) {
     }
 
     
-    if (line.includes('<title>')) {
+    if (line.includes('<title>') && !line.includes('Wikipedia:WikiProject Spam/LinkReports')) { //if the line is a title and does NOT include spamreports
         articleCount++;
         articleTitle = line.slice(11, -8); //slice the first 11 chars and last 8 chars to grab only the title
         articleTitle = articleTitle.replace(regex, '-');
@@ -45,6 +45,8 @@ readline.on('line', function(line) {
         if (articleCount % 10000000 === 0) { //if the articles reaches 10 milly add one to the directory count so a new directory gets made
             articleDirectoryCount ++;
         }
+    } else {
+        isInPage = false; // Set the flag to true
     }
 
     if (isInPage == true) {
@@ -53,7 +55,7 @@ readline.on('line', function(line) {
     
     
     if (line.includes('</page>')) {
-        isInPage = false; // Reset the flag as the block ends
+        isInPage = false; // Rleset the flag as the block ends
 
         if (!fs.existsSync('/home/dev/dumparse/wikidump/articles' + articleDirectoryCount)){
             fs.mkdirSync('/home/dev/dumparse/wikidump/articles' + articleDirectoryCount, { recursive: true });
@@ -62,7 +64,7 @@ readline.on('line', function(line) {
 
         console.log('Line: ' + lineCount + '   Article: ' + articleCount + '   Title: ' + articleTitle);
         try {
-            promises.writeFile('/home/dev/wiki_project/dumparse/articles' + articleDirectoryCount + '/' + articleTitle + '.md', pageContent, {
+            promises.writeFile('/home/dev/dumparse/wikidump/articles' + articleDirectoryCount + '/' + articleTitle + '.md', pageContent, {
                 flag: "w"
             }).then(() => {
             })
