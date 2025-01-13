@@ -11,7 +11,7 @@ var es = require('stream');
 var rl = require('readline');
 
 //create an in and out stream and an interface to read line by line and print the data
-var instream = fs.createReadStream('gabawaba')
+var instream = fs.createReadStream('D:\\wiki\\wikidump.xml')
 var outstream = new es();
 var readline = rl.createInterface(instream, outstream);
 
@@ -26,7 +26,9 @@ let lineCount = 1;
 let articleCount = 0;
 let articleDirectoryCount = 1;
 
-const regex = /[#^\[\]|\\/:]/g;  //wild regex to remove illegal characters in filename for obsidian
+const illegalCharsRegex = /[#^\[\]|\*\\/"\?:]/g;  //wild regex to remove illegal characters in filename to play nice in obsidian and Windows
+const reservedNamesRegex = /^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/i; //this works perfect
+
 
 console.log('Processing Wikipedia XML dump...');
 readline.on('line', function(line) {
@@ -36,10 +38,11 @@ readline.on('line', function(line) {
     }
 
     
-    if (line.includes('<title>')) {
+    if (line.includes('<title>') && !line.includes("Wikipedia:WikiProject Spam/LinkReports")) {
         articleCount++;
         articleTitle = line.slice(11, -8); //slice the first 11 chars and last 8 chars to grab only the title
-        articleTitle = articleTitle.replace(regex, '-');
+        articleTitle = articleTitle.replace(illegalCharsRegex, '-');
+        articleTitle = articleTitle.replace(reservedNamesRegex, (match) => `'${match}'`); //surround illegal filename in single quotes
         articleTitle = articleTitle.substring(0, maxArticleTitleLength);
 
         if (articleCount % 10000000 === 0) { //if the articles reaches 10 milly add one to the directory count so a new directory gets made
@@ -55,14 +58,17 @@ readline.on('line', function(line) {
     if (line.includes('</page>')) {
         isInPage = false; // Reset the flag as the block ends
 
-        if (!fs.existsSync('/home/dev/dumparse/wikidump/articles' + articleDirectoryCount)){
-            fs.mkdirSync('/home/dev/dumparse/wikidump/articles' + articleDirectoryCount, { recursive: true });
+        if (!fs.existsSync('D:\\wiki\\articles' + articleDirectoryCount)){
+            fs.mkdirSync('D:\\wiki\\articles' + articleDirectoryCount, { recursive: true });
             console.log('Created new subdirectory: articles' + articleDirectoryCount);
         }
 
-        console.log('Line: ' + lineCount + '   Article: ' + articleCount + '   Title: ' + articleTitle);
+        if (articleCount % 1000 === 0) { //if the articles reaches 5k the print for logging
+            console.log('Line: ' + lineCount + '   Article: ' + articleCount + '   Title: ' + articleTitle);
+        }
+        
         try {
-            promises.writeFile('/home/dev/wiki_project/dumparse/articles' + articleDirectoryCount + '/' + articleTitle + '.md', pageContent, {
+            promises.writeFile('D:\\wiki\\articles' + articleDirectoryCount + '\\' + articleTitle + '.md', pageContent, {
                 flag: "w"
             }).then(() => {
             })
@@ -72,7 +78,8 @@ readline.on('line', function(line) {
             console.error(err);
         }
     }
-    //console.log("Line: " + lineCount);
+
+
     lineCount++;
 });
 
